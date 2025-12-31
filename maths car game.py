@@ -1,11 +1,11 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
-st.set_page_config(page_title="IsuruSoft Fast Racer", layout="centered")
+st.set_page_config(page_title="IsuruSoft Slow Racer", layout="centered")
 
 st.markdown("""
-    <h1 style='text-align: center; color: #ff4b4b; font-family: sans-serif; margin-bottom: 0;'>🏎️ IsuruSoft Fast Racer</h1>
-    <p style='text-align: center; color: #cbd5e1; font-family: sans-serif;'>පාරේ දිග අඩු කළා - දැන් වේගයෙන් ප්‍රශ්න එනවා!</p>
+    <h1 style='text-align: center; color: #ff4b4b; font-family: sans-serif; margin-bottom: 0;'>🏎️ IsuruSoft Slow Racer</h1>
+    <p style='text-align: center; color: #cbd5e1; font-family: sans-serif;'>දැන් ගේම් එක ගොඩක් හෙමින් (Slow) ක්‍රියාත්මක වේ.</p>
 """, unsafe_allow_html=True)
 
 game_html = """
@@ -28,15 +28,14 @@ game_html = """
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
 
-        // පාරේ දිග (Height) සැලකිය යුතු ලෙස අඩු කළා
         canvas.width = 320; 
         canvas.height = 450; 
 
         let carX = 135;
-        const carY = 340; // කාර් එකේ පිහිටීමත් උඩට ගත්තා
+        const carY = 340; 
         let score = 0;
         let obsY = -50;
-        let speed = 5; 
+        let speed = 2; // වේගය ගොඩක් අඩු කළා (Slow speed)
         let question = "";
         let options = [];
         let correctAns = 0;
@@ -66,14 +65,16 @@ game_html = """
         generateQuestion();
 
         function update() {
-            if (leftPressed && carX > 5) carX -= 8;
-            if (rightPressed && carX < 265) carX += 8;
+            // කාර් එකේ වේගයත් සුමට කළා
+            if (leftPressed && carX > 5) carX -= 5;
+            if (rightPressed && carX < 265) carX += 5;
 
             obsY += speed;
             if (obsY > canvas.height) {
                 obsY = -40;
                 generateQuestion();
-                speed += 0.03;
+                // වේගය වැඩිවන ප්‍රමාණයත් අඩු කළා
+                speed += 0.01; 
             }
 
             if (obsY > carY - 25 && obsY < carY + 60) {
@@ -90,21 +91,20 @@ game_html = """
         }
 
         function drawCar(x, y) {
-            ctx.fillStyle = "#ff4b4b"; // Body
+            ctx.fillStyle = "#ff4b4b"; 
             ctx.fillRect(x, y, 50, 80);
-            ctx.fillStyle = "#000"; // Wheels
+            ctx.fillStyle = "#000"; 
             ctx.fillRect(x-4, y+10, 6, 15); ctx.fillRect(x+48, y+10, 6, 15);
             ctx.fillRect(x-4, y+55, 6, 15); ctx.fillRect(x+48, y+55, 6, 15);
-            ctx.fillStyle = "#94a3b8"; // Window
+            ctx.fillStyle = "#94a3b8"; 
             ctx.fillRect(x+10, y+15, 30, 15);
-            ctx.fillStyle = "#fbbf24"; // Lights
+            ctx.fillStyle = "#fbbf24"; 
             ctx.fillRect(x+5, y+2, 10, 4); ctx.fillRect(x+35, y+2, 10, 4);
         }
 
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // Lane lines
             ctx.strokeStyle = "rgba(255,255,255,0.2)";
             ctx.setLineDash([15, 15]);
             ctx.beginPath(); ctx.moveTo(160, 0); ctx.lineTo(160, 450); ctx.stroke();
@@ -136,6 +136,3 @@ game_html = """
     </script>
 </body>
 </html>
-"""
-
-components.html(game_html, height=470)
