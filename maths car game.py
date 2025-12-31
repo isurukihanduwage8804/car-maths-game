@@ -1,22 +1,25 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
-# පිටුවේ සැකසුම්
-st.set_page_config(page_title="IsuruSoft Math Car Race", layout="centered")
+st.set_page_config(page_title="IsuruSoft Fast Racer", layout="centered")
 
 st.markdown("""
-    <h1 style='text-align: center; color: #ff4b4b; font-family: sans-serif;'>🏎️ IsuruSoft Math Car Race</h1>
-    <p style='text-align: center; color: #cbd5e1; font-family: sans-serif;'>Keyboard එකේ <b>Left/Right Arrows</b> පාවිච්චි කර නිවැරදි පිළිතුර තෝරන්න!</p>
+    <h1 style='text-align: center; color: #ff4b4b; font-family: sans-serif; margin-bottom: 0;'>🏎️ IsuruSoft Fast Racer</h1>
+    <p style='text-align: center; color: #cbd5e1; font-family: sans-serif;'>පාරේ දිග අඩු කළා - දැන් වේගයෙන් ප්‍රශ්න එනවා!</p>
 """, unsafe_allow_html=True)
 
-# HTML/JavaScript කොටස
 game_html = """
 <!DOCTYPE html>
 <html>
 <head>
     <style>
-        body { margin: 0; overflow: hidden; background: #0f172a; }
-        canvas { display: block; background: #1e293b; margin: auto; border: 5px solid #334155; border-radius: 15px; }
+        body { margin: 0; overflow: hidden; background: #0f172a; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        canvas { 
+            display: block; 
+            background: #1e293b; 
+            border: 5px solid #475569; 
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+        }
     </style>
 </head>
 <body>
@@ -25,19 +28,19 @@ game_html = """
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
 
-        canvas.width = 400;
-        canvas.height = 600;
+        // පාරේ දිග (Height) සැලකිය යුතු ලෙස අඩු කළා
+        canvas.width = 320; 
+        canvas.height = 450; 
 
-        let carX = 175;
-        const carY = 480;
+        let carX = 135;
+        const carY = 340; // කාර් එකේ පිහිටීමත් උඩට ගත්තා
         let score = 0;
-        let obsY = -100;
-        let speed = 4;
+        let obsY = -50;
+        let speed = 5; 
         let question = "";
         let options = [];
         let correctAns = 0;
         
-        // යතුරු පුවරුව පාලනය (Keyboard control)
         let leftPressed = false;
         let rightPressed = false;
 
@@ -52,99 +55,87 @@ game_html = """
         });
 
         function generateQuestion() {
-            let n1 = Math.floor(Math.random() * 10) + 1;
-            let n2 = Math.floor(Math.random() * 10) + 1;
+            let n1 = Math.floor(Math.random() * 12) + 1;
+            let n2 = Math.floor(Math.random() * 12) + 1;
             correctAns = n1 + n2;
             question = n1 + " + " + n2 + " = ?";
-            let wrongAns = correctAns + (Math.random() < 0.5 ? 2 : -1);
+            let wrongAns = correctAns + (Math.random() < 0.5 ? 2 : -2);
             options = [correctAns, wrongAns].sort(() => Math.random() - 0.5);
         }
 
         generateQuestion();
 
         function update() {
-            // කාර් එක එහා මෙහා කිරීම
-            if (leftPressed && carX > 10) carX -= 7;
-            if (rightPressed && carX < 340) carX += 7;
+            if (leftPressed && carX > 5) carX -= 8;
+            if (rightPressed && carX < 265) carX += 8;
 
-            // බාධක පල්ලෙහාට ඒම
             obsY += speed;
-            if (obsY > 600) {
-                obsY = -100;
+            if (obsY > canvas.height) {
+                obsY = -40;
                 generateQuestion();
-                speed += 0.1;
+                speed += 0.03;
             }
 
-            // හැප්පීම පරීක්ෂා කිරීම (Collision)
-            if (obsY > carY - 30 && obsY < carY + 80) {
-                let hitSide = (carX < 150) ? 0 : (carX > 200 ? 1 : -1);
+            if (obsY > carY - 25 && obsY < carY + 60) {
+                let hitSide = (carX < 130) ? 0 : (carX > 140 ? 1 : -1);
                 if (hitSide !== -1) {
                     if (options[hitSide] === correctAns) {
                         score += 10;
                     } else {
                         score = Math.max(0, score - 5);
                     }
-                    obsY = 650; // ඊළඟ ප්‍රශ්නයට යෑමට
+                    obsY = canvas.height + 50;
                 }
             }
         }
 
+        function drawCar(x, y) {
+            ctx.fillStyle = "#ff4b4b"; // Body
+            ctx.fillRect(x, y, 50, 80);
+            ctx.fillStyle = "#000"; // Wheels
+            ctx.fillRect(x-4, y+10, 6, 15); ctx.fillRect(x+48, y+10, 6, 15);
+            ctx.fillRect(x-4, y+55, 6, 15); ctx.fillRect(x+48, y+55, 6, 15);
+            ctx.fillStyle = "#94a3b8"; // Window
+            ctx.fillRect(x+10, y+15, 30, 15);
+            ctx.fillStyle = "#fbbf24"; // Lights
+            ctx.fillRect(x+5, y+2, 10, 4); ctx.fillRect(x+35, y+2, 10, 4);
+        }
+
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // පාරේ මැද ඉරි
-            ctx.strokeStyle = "#475569";
-            ctx.setLineDash([30, 30]);
-            ctx.lineWidth = 4;
-            ctx.beginPath();
-            ctx.moveTo(200, 0); ctx.lineTo(200, 600);
-            ctx.stroke();
-
-            // කාර් එක (IsuruSoft Red)
-            ctx.fillStyle = "#ff4b4b";
-            ctx.shadowBlur = 10; ctx.shadowColor = "black";
-            ctx.fillRect(carX, carY, 50, 90);
-            ctx.shadowBlur = 0; 
             
-            // කාර් එකේ වීදුරු සහ ලාම්පු
-            ctx.fillStyle = "#94a3b8";
-            ctx.fillRect(carX+5, carY+15, 40, 25); // වීදුරුව
-            ctx.fillStyle = "#fbbf24";
-            ctx.fillRect(carX+5, carY, 10, 5); // ලාම්පු
-            ctx.fillRect(carX+35, carY, 10, 5);
+            // Lane lines
+            ctx.strokeStyle = "rgba(255,255,255,0.2)";
+            ctx.setLineDash([15, 15]);
+            ctx.beginPath(); ctx.moveTo(160, 0); ctx.lineTo(160, 450); ctx.stroke();
 
-            // ප්‍රශ්නය පෙන්වන කොටස
+            drawCar(carX, carY);
+
             ctx.fillStyle = "#facc15";
-            ctx.font = "bold 28px sans-serif";
-            ctx.textAlign = "center";
-            ctx.fillText(question, 200, 60);
-
-            // ලකුණු පෙන්වන කොටස
-            ctx.fillStyle = "white";
-            ctx.font = "20px sans-serif";
-            ctx.fillText("Score: " + score, 60, 40);
-
-            // පිළිතුරු බෝල (Answers)
-            ctx.fillStyle = "#38bdf8"; // ලස්සන නිල් පාටක්
-            ctx.beginPath(); ctx.arc(100, obsY, 35, 0, Math.PI * 2); ctx.fill();
-            ctx.beginPath(); ctx.arc(300, obsY, 35, 0, Math.PI * 2); ctx.fill();
-            
-            ctx.fillStyle = "white";
             ctx.font = "bold 22px sans-serif";
-            ctx.fillText(options[0], 100, obsY + 8);
-            ctx.fillText(options[1], 300, obsY + 8);
+            ctx.textAlign = "center";
+            ctx.fillText(question, 160, 50);
+
+            ctx.fillStyle = "white";
+            ctx.font = "16px sans-serif";
+            ctx.fillText("Score: " + score, 50, 25);
+
+            ctx.fillStyle = "#38bdf8";
+            ctx.beginPath(); ctx.arc(80, obsY, 28, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(240, obsY, 28, 0, Math.PI * 2); ctx.fill();
+
+            ctx.fillStyle = "white";
+            ctx.font = "bold 18px sans-serif";
+            ctx.fillText(options[0], 80, obsY + 6);
+            ctx.fillText(options[1], 240, obsY + 6);
 
             update();
             requestAnimationFrame(draw);
         }
-
         draw();
     </script>
 </body>
 </html>
 """
 
-components.html(game_html, height=650)
-
-st.sidebar.title("🎮 පාලනය (Controls)")
-st.sidebar.info("ඔබේ පරිගණකයේ Keyboard එකේ ⬅️ සහ ➡️ ඊතල යතුරු (Arrow Keys) භාවිතයෙන් කාර් එක පාලනය කරන්න.")
+components.html(game_html, height=470)
