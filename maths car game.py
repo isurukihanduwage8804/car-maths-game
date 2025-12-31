@@ -1,11 +1,11 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
-st.set_page_config(page_title="IsuruSoft Slow Racer", layout="centered")
+st.set_page_config(page_title="IsuruSoft Taxi Racer", layout="centered")
 
 st.markdown("""
-    <h1 style='text-align: center; color: #ff4b4b; font-family: sans-serif; margin-bottom: 0;'>🏎️ IsuruSoft Slow Racer</h1>
-    <p style='text-align: center; color: #cbd5e1; font-family: sans-serif;'>දැන් ගේම් එක ගොඩක් හෙමින් (Slow) ක්‍රියාත්මක වේ.</p>
+    <h1 style='text-align: center; color: #facc15; font-family: sans-serif; margin-bottom: 0;'>🚕 IsuruSoft Taxi Racer</h1>
+    <p style='text-align: center; color: #cbd5e1; font-family: sans-serif;'>ඔයා එවපු ටැක්සි කාර් එකත් සමඟ ගණිත ගැටලු විසඳමු!</p>
 """, unsafe_allow_html=True)
 
 game_html = """
@@ -31,11 +31,15 @@ game_html = """
         canvas.width = 320; 
         canvas.height = 450; 
 
+        // ඔයා එවපු PNG කාර් රූපය ලෝඩ් කිරීම
+        const carImg = new Image();
+        carImg.src = "https://raw.githubusercontent.com/isurukihanduwage8804/isurusoft/main/car.png"; 
+
         let carX = 135;
         const carY = 340; 
         let score = 0;
         let obsY = -50;
-        let speed = 2; // වේගය ගොඩක් අඩු කළා (Slow speed)
+        let speed = 2; // ඔයා ඉල්ලපු විදිහට වේගය අඩු කර ඇත
         let question = "";
         let options = [];
         let correctAns = 0;
@@ -54,8 +58,8 @@ game_html = """
         });
 
         function generateQuestion() {
-            let n1 = Math.floor(Math.random() * 12) + 1;
-            let n2 = Math.floor(Math.random() * 12) + 1;
+            let n1 = Math.floor(Math.random() * 10) + 1;
+            let n2 = Math.floor(Math.random() * 10) + 1;
             correctAns = n1 + n2;
             question = n1 + " + " + n2 + " = ?";
             let wrongAns = correctAns + (Math.random() < 0.5 ? 2 : -2);
@@ -65,7 +69,6 @@ game_html = """
         generateQuestion();
 
         function update() {
-            // කාර් එකේ වේගයත් සුමට කළා
             if (leftPressed && carX > 5) carX -= 5;
             if (rightPressed && carX < 265) carX += 5;
 
@@ -73,11 +76,10 @@ game_html = """
             if (obsY > canvas.height) {
                 obsY = -40;
                 generateQuestion();
-                // වේගය වැඩිවන ප්‍රමාණයත් අඩු කළා
                 speed += 0.01; 
             }
 
-            if (obsY > carY - 25 && obsY < carY + 60) {
+            if (obsY > carY - 20 && obsY < carY + 80) {
                 let hitSide = (carX < 130) ? 0 : (carX > 140 ? 1 : -1);
                 if (hitSide !== -1) {
                     if (options[hitSide] === correctAns) {
@@ -90,27 +92,18 @@ game_html = """
             }
         }
 
-        function drawCar(x, y) {
-            ctx.fillStyle = "#ff4b4b"; 
-            ctx.fillRect(x, y, 50, 80);
-            ctx.fillStyle = "#000"; 
-            ctx.fillRect(x-4, y+10, 6, 15); ctx.fillRect(x+48, y+10, 6, 15);
-            ctx.fillRect(x-4, y+55, 6, 15); ctx.fillRect(x+48, y+55, 6, 15);
-            ctx.fillStyle = "#94a3b8"; 
-            ctx.fillRect(x+10, y+15, 30, 15);
-            ctx.fillStyle = "#fbbf24"; 
-            ctx.fillRect(x+5, y+2, 10, 4); ctx.fillRect(x+35, y+2, 10, 4);
-        }
-
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            ctx.strokeStyle = "rgba(255,255,255,0.2)";
+            // පාරේ ඉරි
+            ctx.strokeStyle = "rgba(255,255,255,0.15)";
             ctx.setLineDash([15, 15]);
             ctx.beginPath(); ctx.moveTo(160, 0); ctx.lineTo(160, 450); ctx.stroke();
 
-            drawCar(carX, carY);
+            // කාර් එක ඇඳීම (ටැක්සි කාර් එකේ රූපය)
+            ctx.drawImage(carImg, carX, carY, 50, 95);
 
+            // UI
             ctx.fillStyle = "#facc15";
             ctx.font = "bold 22px sans-serif";
             ctx.textAlign = "center";
@@ -120,6 +113,7 @@ game_html = """
             ctx.font = "16px sans-serif";
             ctx.fillText("Score: " + score, 50, 25);
 
+            // පිළිතුරු බෝල (Glowing Blue)
             ctx.fillStyle = "#38bdf8";
             ctx.beginPath(); ctx.arc(80, obsY, 28, 0, Math.PI * 2); ctx.fill();
             ctx.beginPath(); ctx.arc(240, obsY, 28, 0, Math.PI * 2); ctx.fill();
@@ -136,3 +130,6 @@ game_html = """
     </script>
 </body>
 </html>
+"""
+
+components.html(game_html, height=470)
